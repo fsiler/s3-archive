@@ -11,13 +11,23 @@ authorName: 'Serverless, inc.'
 authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
 -->
 
-## Lambda-archive: an efficient way to deep archive smaller files
-The problem with S3 is that Glacier and Glacier Deep Storage do not play well with smaller files.  The idea here is to [hook](https://www.serverless.com/framework/docs/providers/aws/events/s3/) the `s3:ObjectCreated` hook or enumerate objects in S3 in order to process them into deep archive.
+## S3-archive: an efficient way to deep archive smaller files
+The problem with S3 is that Glacier and Glacier Deep Storage [do not play well with smaller files](https://therub.org/2015/11/18/glacier-costlier-than-s3-for-small-files/).  The idea here is to [hook](https://www.serverless.com/framework/docs/providers/aws/events/s3/) the `s3:ObjectCreated` hook or enumerate objects in S3 in order to process them into deep archive.
 
-# Task list
+## Architecture
+- an SQS *handler* which runs on file upload, and immediately archives files larger than THRESHOLD
+- a *sweeper* which runs periodically, recursively descends into the directory tree, zips up smaller files up until they reach ARCHIVE\_SIZE, archives the zip, deletes the files, and emails EMAIL\_ADDRESS with the manifest.
+
+## parameters
+- THRESHOLD - how big the file is before it should be uploaded bare, default 200kB.
+- ARCHIVE\_SIZE - how big the archive needs to be before left in a folder, default 1MB
+- EMAIL\_ADDRESS - who to email the zip archive manifests to
+
+## Task list
 - send test email
 - transition a single file to Deep Glacier
 - add up the sizes of all the files, and send the manifest in an email
+- zip up a file from smaller files and archive it
 - recursively descend into directory trees, either zipping up when files total >=200kB in size, or returning a reference upstream.
 
 # Serverless Framework Python SQS Producer-Consumer on AWS
