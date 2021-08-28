@@ -18,7 +18,8 @@ The problem with S3 is that Glacier and Glacier Deep Storage [do not play well w
 - an SQS *handler* which runs on file upload, and immediately archives files larger than THRESHOLD
 - a *sweeper* which runs periodically, recursively descends into the directory tree, zips up smaller files up until they reach ARCHIVE\_SIZE, archives the zip, deletes the files, and emails EMAIL\_ADDRESS with the manifest.
 
-## parameters
+## parameters (passed via environment)
+- BUCKET\_NAME - self explanatory
 - THRESHOLD - how big the file is before it should be uploaded bare, default 200kB.
 - ARCHIVE\_SIZE - how big the archive needs to be before left in a folder, default 1MB
 - EMAIL\_ADDRESS - who to email the zip archive manifests to
