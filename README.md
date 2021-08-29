@@ -28,7 +28,7 @@ The problem with S3 is that Glacier and Glacier Deep Storage [do not play well w
 - send test email
 - transition a single file to Deep Glacier
 - add up the sizes of all the files, and send the manifest in an email
-- zip up a file from smaller files and archive it
+- zip up (actually suggest txz- an xz'd tarball) a file from smaller files and archive it
 - recursively descend into directory trees, either zipping up when files total >=200kB in size, or returning a reference upstream.
 
 # Serverless Framework Python SQS Producer-Consumer on AWS
