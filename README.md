@@ -15,6 +15,7 @@ authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
 The problem with S3 is that Glacier and Glacier Deep Storage [do not play well with smaller files](https://therub.org/2015/11/18/glacier-costlier-than-s3-for-small-files/).  The idea here is to [hook](https://www.serverless.com/framework/docs/providers/aws/events/s3/) the `s3:ObjectCreated` hook or enumerate objects in S3 in order to process them into deep archive.
 
 ## Architecture
+- possible improvement to below: use just a tarfile or ZIP which can be appended to, and let the handler just do everything.  See eg [indexing ZIP file without downloading](https://stackoverflow.com/q/41789176), [same for tarball](https://stackoverflow.com/q/56086604).  Obviously, would have to do the math.  Wonder if it might be worth storing an inventory of files in IA storage or something for quick reference.
 - an SQS *handler* which runs on file upload, and immediately archives files larger than THRESHOLD
 - a *sweeper* which runs periodically, recursively descends into the directory tree, zips up smaller files up until they reach ARCHIVE\_SIZE, archives the zip, deletes the files, and emails EMAIL\_ADDRESS with the manifest.
 
