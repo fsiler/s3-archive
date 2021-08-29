@@ -37,7 +37,7 @@ DESIRED_STORAGE_CLASS = 'DEEP_ARCHIVE'
 #for i in s3r.Bucket(BUCKET).objects.all():
 ##  print(dir(i))
 #  print(i.storage_class, i.size, i.key)
-#  if i.size > 200 * 1024 and i.storage_class != DESIRED_STORAGE_CLASS:
+#  if i.size > 2**17 and i.storage_class != DESIRED_STORAGE_CLASS:
 #    print("***** archiving file: ", i.key, i.size)
 #    s3c.copy({'Bucket': BUCKET, 'Key': i.key},
 #      BUCKET, i.key,
