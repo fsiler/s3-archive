@@ -20,6 +20,7 @@ The problem with S3 is that Glacier and Glacier Deep Storage [do not play well w
 
 ## parameters (passed via environment)
 - BUCKET\_NAME - self explanatory
+- DESIRED\_STORAGE\_CLASS - self-explanatory
 - THRESHOLD - how big the file is before it should be uploaded bare, default 200kB.
 - ARCHIVE\_SIZE - how big the archive needs to be before left in a folder, default 1MB
 - EMAIL\_ADDRESS - who to email the zip archive manifests to
