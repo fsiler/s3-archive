@@ -11,13 +11,6 @@ def lambda_handler(event, context):
 #  print("Received event: " + json.dumps(event, indent=2))
   for i, record in enumerate(event['Records']):
   #    print("RECORD: " + json.dumps(record, indent=2))
-    # assume that we are "chasing our own tail" if it's a copy- would be better
-    # to figure out if there's a way to trace ourselves. The insight here
-    # though is that Puts default to Standard, so those would be the ones we'd
-    # want to act on.
-    if record['eventName'] == 'ObjectCreated:Copy':
-      print(f"{i}: found an object copy event, not proceeding")
-      continue
 
     try:
       bucket = record['s3']['bucket']['name']
@@ -26,6 +19,15 @@ def lambda_handler(event, context):
     except KeyError as e:
       print(f"{i} encountered while attempting to index s3 key: {record}")
       print(e)
+      continue
+
+    # assume that we are "chasing our own tail" if it's not a put- would be
+    # better to figure out if there's a way to trace ourselves (maybe a tag, if
+    # not too expensive to create and query? possibly database entry). The
+    # insight here though is that Puts default to Standard, so those would be
+    # the ones we'd want to act on.
+    if record['eventName'] != 'ObjectCreated:Put':
+      print(f"{i}: found a non-put event for object {key} ({size} bytes), not proceeding")
       continue
 
     if size > SIZE_THRESHOLD:
