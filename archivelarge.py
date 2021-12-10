@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-from csv                 import DictReader
-from gzip                import open as gzopen
-from sys                 import argv, stderr
-from shlex               import quote as shquote
-from urllib.parse        import unquote
+from csv          import reader
+from gzip         import open as gzopen
+from sys          import argv, stderr
+from s3_archive   import changestorageclass
+from urllib.parse import unquote
 
 DESIRED_STORAGE_CLASS = 'DEEP_ARCHIVE'
 THRESHOLD = 128 * 1024
@@ -19,12 +19,14 @@ def sizeof_fmt(num, suffix="B"):
 
 if __name__ == '__main__':
   with gzopen(argv[1],'rt') as f:
-    reader = DictReader(f)
+    reader = reader(f)
     for o in reader:
-      bucket = unquote(o['bucket'])
-      key  = unquote(o['key'])
-      size = int(o['size'])
+      bucket       = unquote(o[0])
+      key          = unquote(o[1])
+      size         = int(o[2])
+      storageclass = o[3]
 
-      if size >= THRESHOLD and o['storageclass'] != DESIRED_STORAGE_CLASS:
+      if size >= THRESHOLD and storageclass != DESIRED_STORAGE_CLASS:
+        changestorageclass(bucket, key, noop=True)
         # XXX: may be some significant quoting issues with this
-        print(f"aws s3 cp 's3://{bucket}/{key}' 's3://{bucket}/{key}' --storage-class {DESIRED_STORAGE_CLASS} --metadata-directive COPY;: {sizeof_fmt(size)}")
+        #print(f"aws s3 cp 's3://{bucket}/{key}' 's3://{bucket}/{key}' --storage-class {DESIRED_STORAGE_CLASS} --metadata-directive COPY;: {sizeof_fmt(size)}")
