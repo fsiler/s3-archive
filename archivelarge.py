@@ -1,26 +1,12 @@
 #!/usr/bin/env python3
-from boto3               import client
-from botocore.exceptions import ClientError
 from csv                 import DictReader
+from gzip                import open as gzopen
 from sys                 import argv, stderr
+from shlex               import quote as shquote
 from urllib.parse        import unquote
 
-s3c = client("s3")
 DESIRED_STORAGE_CLASS = 'DEEP_ARCHIVE'
 THRESHOLD = 128 * 1024
-
-def changestorageclass(bucket, key, desired_class=DESIRED_STORAGE_CLASS):
-  try:
-    s3c.copy({'Bucket': bucket, 'Key': key},
-             bucket, key,
-             ExtraArgs = {
-               'StorageClass': desired_class,
-               'MetadataDirective': 'COPY' })
-  except ClientError as e:
-    if e.response['Error']['Code'] == 'InvalidObjectState':
-      print(f"had issue changing storage class ({e})", file=stderr)
-    else:
-      print(f"got error {e}, continuing", file=stderr)
 
 # courtesy https://stackoverflow.com/a/1094933
 def sizeof_fmt(num, suffix="B"):
@@ -30,12 +16,15 @@ def sizeof_fmt(num, suffix="B"):
     num /= 1024.0
   return f"{num:.1f}Yi{suffix}"
 
+
 if __name__ == '__main__':
-  with open(argv[1]) as f:
+  with gzopen(argv[1],'rt') as f:
     reader = DictReader(f)
     for o in reader:
-      size = int(o['size'])
+      bucket = unquote(o['bucket'])
       key  = unquote(o['key'])
+      size = int(o['size'])
+
       if size >= THRESHOLD and o['storageclass'] != DESIRED_STORAGE_CLASS:
-        print(f"archiving {key} ({sizeof_fmt(size)})", flush=True)
-        changestorageclass(o['bucket'], key)
+        # XXX: may be some significant quoting issues with this
+        print(f"aws s3 cp 's3://{bucket}/{key}' 's3://{bucket}/{key}' --storage-class {DESIRED_STORAGE_CLASS} --metadata-directive COPY;: {sizeof_fmt(size)}")
