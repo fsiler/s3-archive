@@ -27,6 +27,10 @@ if __name__ == '__main__':
       storageclass = o[3]
 
       if size >= THRESHOLD and storageclass != DESIRED_STORAGE_CLASS:
-        changestorageclass(bucket, key, noop=True)
         # XXX: may be some significant quoting issues with this
         #print(f"aws s3 cp 's3://{bucket}/{key}' 's3://{bucket}/{key}' --storage-class {DESIRED_STORAGE_CLASS} --metadata-directive COPY;: {sizeof_fmt(size)}")
+        print(f"**changing storage class for {bucket}:{key} ({sizeof_fmt(size)} {storageclass})...", end="", flush=True)
+        changestorageclass(bucket, key, noop=True)
+        print("done.")
+      else:
+        print(f"noop for {bucket}:{key} ({sizeof_fmt(size)} {storageclass})", flush=True)
